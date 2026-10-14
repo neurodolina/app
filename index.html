@@ -158,7 +158,11 @@ window.KK_DATA = {
     var isTg = url.indexOf("https://t.me/") === 0;
     try{ if(tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred("light"); }catch(_){}
     if(tg){
-      if(isTg){ tg.close(); tg.openTelegramLink(url); }   // порядок важен: сначала close
+      if(isTg){
+        var mobile = (tg.platform === "ios" || tg.platform === "android");
+        if(mobile){ tg.close(); tg.openTelegramLink(url); }          // телефон: сначала close, иначе окно висит поверх чата
+        else { tg.openTelegramLink(url); setTimeout(function(){ try{ tg.close(); }catch(_){} }, 400); }  // веб и десктоп: сначала ссылка, иначе закрытие обрывает её
+      }
       else { tg.openLink(url); }
     } else {
       if(isTg){ sendRaw("web_app_close"); sendRaw("web_app_open_tg_link", {path_full: url.replace("https://t.me","")}); }
